@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import shelve
-import os
 from telebot import types
 from random import shuffle
 from SQLighter import SQLighter
 from config import database_name, shelve_name
 
+def gdbm_shelve(filename, flag="c"):
+    mod = __import__("gdbm")
+    return shelve.Shelf(mod.open(filename, flag))
 
 def count_rows():
     """
@@ -15,9 +17,7 @@ def count_rows():
     """
     db = SQLighter(database_name)
     rowsnum = db.count_rows()
-    curdir = os.path.dirname(__file__)
-    #shelve.open(os.path.join(curdir, shelve_name))
-    with shelve.open(os.path.join(curdir, shelve_name)) as storage:
+    with gdbm_shelve(shelve_name) as storage:
         storage['rows_count'] = rowsnum
 
 
@@ -26,8 +26,7 @@ def get_rows_count():
     Получает из хранилища количество строк в БД
     :return: (int) Число строк
     """
-    curdir = os.path.dirname(__file__)
-    with shelve.open(os.path.join(curdir, shelve_name)) as storage:
+    with gdbm_shelve(shelve_name) as storage:
         rowsnum = storage['rows_count']
     return rowsnum
 
@@ -38,8 +37,7 @@ def set_user_game(chat_id, estimated_answer):
     :param chat_id: id юзера
     :param estimated_answer: правильный ответ (из БД)
     """
-    curdir = os.path.dirname(__file__)
-    with shelve.open(os.path.join(curdir, shelve_name)) as storage:
+    with gdbm_shelve(shelve_name) as storage:
         storage[str(chat_id)] = estimated_answer
 
 
@@ -48,8 +46,7 @@ def finish_user_game(chat_id):
     Заканчиваем игру текущего пользователя и удаляем правильный ответ из хранилища
     :param chat_id: id юзера
     """
-    curdir = os.path.dirname(__file__)
-    with shelve.open(os.path.join(curdir, shelve_name)) as storage:
+    with gdbm_shelve(shelve_name) as storage:
         del storage[str(chat_id)]
 
 
@@ -60,8 +57,7 @@ def get_answer_for_user(chat_id):
     :param chat_id: id юзера
     :return: (str) Правильный ответ / None
     """
-    curdir = os.path.dirname(__file__)
-    with shelve.open(os.path.join(curdir, shelve_name)) as storage:
+    with gdbm_shelve(shelve_name) as storage:
         try:
             answer = storage[str(chat_id)]
             return answer
