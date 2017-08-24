@@ -7,8 +7,8 @@ from SQLighter import SQLighter
 from config import database_name, shelve_name
 
 def gdbm_shelve(filename, flag="c"):
-    mod = __import__("gdbm")
-    return shelve.Shelf(mod.open(filename, flag))
+    #mod = __import__("gdbm")
+    return shelve.Shelf(gdbm.open(filename, flag))
 
 def count_rows():
     """
